@@ -415,7 +415,8 @@ export default class Item extends Component {
               this.itemId,
               resizeTime,
               resizeEdge,
-              this.resizeTimeDelta(e, resizeEdge)
+              this.resizeTimeDelta(e, resizeEdge),
+              this.props.item
             )
           }
           this.setState({
