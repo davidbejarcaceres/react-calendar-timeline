@@ -274,7 +274,7 @@ export default class Item extends Component {
               dragTime = validResult
             }
             if (validResult.newGroupIndex !== undefined) {
-              dragGroupDelta = validResult.newGroupIndex - this.props.order.index
+              dragGroupDelta = validResult.newGroupIndex - this.props.order
             }
           }
 
@@ -315,7 +315,7 @@ export default class Item extends Component {
                 dragTime = validResult
               }
               if (validResult.newGroupIndex !== undefined) {
-                dragGroupDelta = validResult.newGroupIndex - this.props.order.index
+                dragGroupDelta = validResult.newGroupIndex - this.props.order
               }
             }
 

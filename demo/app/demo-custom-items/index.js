@@ -1,10 +1,13 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import moment from 'moment'
 
 import Timeline from 'react-calendar-timeline'
 // import containerResizeDetector from 'react-calendar-timeline/lib/resize-detector/container'
 
 import generateFakeData from '../generate-fake-data'
+const REFRESH_INTERVAL = 1000;
+const MOVING_STEP = 1 * 60 * 1000; // 1 Minute
+const MOVING_TOLERANCE = MOVING_STEP * 2; // Tolerance to time moving when recorder changes
 
 var minTime = moment()
   .add(-6, 'months')
@@ -29,7 +32,7 @@ export default class App extends Component {
   constructor(props) {
     super(props)
 
-    const { groups, items } = generateFakeData()
+    const {groups, items} = generateFakeData()
     const defaultTimeStart = moment()
       .startOf('day')
       .toDate()
@@ -42,7 +45,7 @@ export default class App extends Component {
       groups,
       items,
       defaultTimeStart,
-      defaultTimeEnd
+      defaultTimeEnd,
     }
   }
 
@@ -71,7 +74,7 @@ export default class App extends Component {
   }
 
   handleItemMove = (itemId, dragTime, newGroupOrder) => {
-    const { items, groups } = this.state
+    const {items, groups} = this.state
 
     const group = groups[newGroupOrder]
 
@@ -92,7 +95,7 @@ export default class App extends Component {
   }
 
   handleItemResize = (itemId, time, edge) => {
-    const { items } = this.state
+    const {items} = this.state
 
     this.setState({
       items: items.map(
@@ -122,14 +125,17 @@ export default class App extends Component {
     }
   }
 
-  moveResizeValidator = (action, item, time, resizeEdge) => {
-    if (time < new Date().getTime()) {
-      var newTime =
-        Math.ceil(new Date().getTime() / (15 * 60 * 1000)) * (15 * 60 * 1000)
-      return newTime
-    }
+  moveResizeValidator = (action, item, time, resizeEdge, newGroupIndex, newGroup, currentGroupIndex, currentGroup) => {
 
-    return time
+    if (currentGroupIndex === newGroupIndex) {
+      return time;
+    }
+    const timeMoved = Math.abs(item.start - time);
+    if (timeMoved > MOVING_TOLERANCE) {
+      return time;
+    } else {
+      return item.start
+    }
   }
 
   itemRenderer = ({
@@ -139,7 +145,7 @@ export default class App extends Component {
     getItemProps,
     getResizeProps,
   }) => {
-    const { left: leftResizeProps, right: rightResizeProps } = getResizeProps()
+    const {left: leftResizeProps, right: rightResizeProps} = getResizeProps()
     const backgroundColor = itemContext.selected ? itemContext.dragging ? 'red' : item.selectedBgColor : item.bgColor;
     const borderColor = itemContext.resizing ? 'red' : item.color;
     return (
@@ -155,7 +161,7 @@ export default class App extends Component {
             borderLeftWidth: itemContext.selected ? 3 : 1,
             borderRightWidth: itemContext.selected ? 3 : 1,
           }
-        }) }
+        })}
       >
         {itemContext.useResizeHandle ? (
           <div {...leftResizeProps} />
@@ -165,7 +171,7 @@ export default class App extends Component {
           style={{
             height: itemContext.dimensions.height,
             overflow: 'hidden',
-            paddingLeft:3,
+            paddingLeft: 3,
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap'
           }}
@@ -190,7 +196,7 @@ export default class App extends Component {
   // }
 
   render() {
-    const { groups, items, defaultTimeStart, defaultTimeEnd } = this.state
+    const {groups, items, defaultTimeStart, defaultTimeEnd} = this.state
     console.log("render")
     return (
       <Timeline
@@ -199,6 +205,7 @@ export default class App extends Component {
         keys={keys}
         sidebarWidth={150}
         sidebarContent={<div>Above The Left</div>}
+        dragSnap={MOVING_STEP}
         // rightSidebarWidth={150}
         // rightSidebarContent={<div>Above The Right</div>}
 

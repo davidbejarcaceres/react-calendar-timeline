@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import moment from 'moment'
 
 import Timeline, {
@@ -38,7 +38,7 @@ export default class App extends Component {
   constructor(props) {
     super(props)
 
-    const { groups, items } = generateFakeData()
+    const {groups, items} = generateFakeData()
     const defaultTimeStart = moment()
       .startOf('day')
       .toDate()
@@ -84,17 +84,17 @@ export default class App extends Component {
   }
 
   handleItemMove = (itemId, dragTime, newGroupOrder, previousGroupOrder, item, group, previousGroup) => {
-    const { items } = this.state
+    const {items} = this.state
 
     this.setState({
       items: items.map(
         item =>
           item.id === itemId
             ? Object.assign({}, item, {
-                start: dragTime,
-                end: dragTime + (item.end - item.start),
-                group: group.id
-              })
+              start: dragTime,
+              end: dragTime + (item.end - item.start),
+              group: group.id
+            })
             : item
       )
     })
@@ -103,16 +103,16 @@ export default class App extends Component {
   }
 
   handleItemResize = (itemId, time, edge, item) => {
-    const { items } = this.state
+    const {items} = this.state
 
     this.setState({
       items: items.map(
         item =>
           item.id === itemId
             ? Object.assign({}, item, {
-                start: edge === 'left' ? time : item.start,
-                end: edge === 'left' ? item.end : time
-              })
+              start: edge === 'left' ? time : item.start,
+              end: edge === 'left' ? item.end : time
+            })
             : item
       )
     })
@@ -141,12 +141,13 @@ export default class App extends Component {
       time
     return ({
       time: newTime,
-      newGroupIndex: returnIndex
+      newGroupIndex: newGroupIndex
     })
+    // return time;
   }
 
   render() {
-    const { groups, items, defaultTimeStart, defaultTimeEnd } = this.state
+    const {groups, items, defaultTimeStart, defaultTimeEnd} = this.state
 
     return (
       <Timeline
@@ -191,8 +192,8 @@ export default class App extends Component {
               .add(3, 'day')
               .valueOf()}
           >
-            {({ styles }) => {
-              const newStyles = { ...styles, backgroundColor: 'blue' }
+            {({styles}) => {
+              const newStyles = {...styles, backgroundColor: 'blue'}
               return <div style={newStyles} />
             }}
           </CustomMarker>
