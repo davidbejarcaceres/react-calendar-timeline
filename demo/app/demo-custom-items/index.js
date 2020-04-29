@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import moment from 'moment'
 
 import Timeline from 'react-calendar-timeline'
@@ -29,7 +29,7 @@ export default class App extends Component {
   constructor(props) {
     super(props)
 
-    const { groups, items } = generateFakeData()
+    const {groups, items} = generateFakeData()
     const defaultTimeStart = moment()
       .startOf('day')
       .toDate()
@@ -71,7 +71,7 @@ export default class App extends Component {
   }
 
   handleItemMove = (itemId, dragTime, newGroupId) => {
-    const { items, groups } = this.state
+    const {items, groups} = this.state
 
     const group = groups.find(i => i.id === newGroupId)
 
@@ -80,10 +80,10 @@ export default class App extends Component {
         item =>
           item.id === itemId
             ? Object.assign({}, item, {
-                start: dragTime,
-                end: dragTime + (item.end - item.start),
-                group: group.id
-              })
+              start: dragTime,
+              end: dragTime + (item.end - item.start),
+              group: group.id
+            })
             : item
       )
     })
@@ -92,7 +92,7 @@ export default class App extends Component {
   }
 
   handleItemResize = (itemId, time, edge) => {
-    const { items } = this.state
+    const {items} = this.state
 
     this.setState({
       items: items.map(
@@ -122,7 +122,7 @@ export default class App extends Component {
     }
   }
 
-  moveResizeValidator = (action, item, time, resizeEdge) => {
+  moveResizeValidator = (action, item, time, resizeEdge, groupId) => {
     if (time < new Date().getTime()) {
       var newTime =
         Math.ceil(new Date().getTime() / (15 * 60 * 1000)) * (15 * 60 * 1000)
@@ -139,7 +139,7 @@ export default class App extends Component {
     getItemProps,
     getResizeProps,
   }) => {
-    const { left: leftResizeProps, right: rightResizeProps } = getResizeProps()
+    const {left: leftResizeProps, right: rightResizeProps} = getResizeProps()
     const backgroundColor = itemContext.selected ? itemContext.dragging ? 'red' : item.selectedBgColor : item.bgColor;
     const borderColor = itemContext.resizing ? 'red' : item.color;
     return (
@@ -155,7 +155,7 @@ export default class App extends Component {
             borderLeftWidth: itemContext.selected ? 3 : 1,
             borderRightWidth: itemContext.selected ? 3 : 1,
           }
-        }) }
+        })}
       >
         {itemContext.useResizeHandle ? (
           <div {...leftResizeProps} />
@@ -165,7 +165,7 @@ export default class App extends Component {
           style={{
             height: itemContext.dimensions.height,
             overflow: 'hidden',
-            paddingLeft:3,
+            paddingLeft: 3,
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap'
           }}
@@ -190,7 +190,7 @@ export default class App extends Component {
   // }
 
   render() {
-    const { groups, items, defaultTimeStart, defaultTimeEnd } = this.state
+    const {groups, items, defaultTimeStart, defaultTimeEnd} = this.state
     console.log("render")
     return (
       <Timeline
