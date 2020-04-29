@@ -1,4 +1,4 @@
-import { Component } from 'react'
+import {Component} from 'react'
 import PropTypes from 'prop-types'
 import interact from 'interactjs'
 import moment from 'moment'
@@ -128,12 +128,12 @@ export default class Item extends Component {
   }
 
   getTimeRatio() {
-    const { canvasTimeStart, canvasTimeEnd, canvasWidth } = this.props
+    const {canvasTimeStart, canvasTimeEnd, canvasWidth} = this.props
     return coordinateToTimeRatio(canvasTimeStart, canvasTimeEnd, canvasWidth)
   }
 
   dragTimeSnap(dragTime, considerOffset) {
-    const { dragSnap } = this.props
+    const {dragSnap} = this.props
     if (dragSnap) {
       const offset = considerOffset ? moment().utcOffset() * 60 * 1000 : 0
       return Math.round(dragTime / dragSnap) * dragSnap - offset % dragSnap
@@ -143,7 +143,7 @@ export default class Item extends Component {
   }
 
   resizeTimeSnap(dragTime) {
-    const { dragSnap } = this.props
+    const {dragSnap} = this.props
     if (dragSnap) {
       const endTime = this.itemTimeEnd % dragSnap
       return Math.round((dragTime - endTime) / dragSnap) * dragSnap + endTime
@@ -172,7 +172,7 @@ export default class Item extends Component {
   }
 
   dragGroupDelta(e) {
-    const { groupTops, order } = this.props
+    const {groupTops, order, topOffset} = this.props
     if (this.state.dragging) {
       if (!this.props.canChangeGroup) {
         return 0
@@ -245,11 +245,8 @@ export default class Item extends Component {
           const clickTime = this.timeFor(e);
           this.setState({
             dragging: true,
-            dragStart: { 
-              x: e.pageX,
-              y: e.pageY,
-            offset: this.itemTimeStart - clickTime },
-            preDragPosition: { x: e.target.offsetLeft, y: e.target.offsetTop },
+            dragStart: {x: e.pageX, y: e.pageY},
+            preDragPosition: {x: e.target.offsetLeft, y: e.target.offsetTop},
             dragTime: this.itemTimeStart,
             dragGroupDelta: 0
           })
@@ -270,13 +267,13 @@ export default class Item extends Component {
               this.props.order + dragGroupDelta,
               this.props.order
             )
-            
+
             if (validResult.time) {
               dragTime = validResult.time
             } else {
               dragTime = validResult
             }
-            if (validResult.newGroupIndex) {
+            if (validResult.newGroupIndex !== undefined) {
               dragGroupDelta = validResult.newGroupIndex - this.props.order.index
             }
           }
@@ -317,7 +314,7 @@ export default class Item extends Component {
               } else {
                 dragTime = validResult
               }
-              if (validResult.newGroupIndex) {
+              if (validResult.newGroupIndex !== undefined) {
                 dragGroupDelta = validResult.newGroupIndex - this.props.order.index
               }
             }
@@ -358,7 +355,7 @@ export default class Item extends Component {
 
           if (!resizeEdge) {
             resizeEdge = e.deltaRect.left !== 0 ? 'left' : 'right'
-            this.setState({ resizeEdge })
+            this.setState({resizeEdge})
           }
           let resizeTime = this.resizeTimeSnap(this.timeFor(e))
 
@@ -390,8 +387,12 @@ export default class Item extends Component {
       })
       .on('resizeend', e => {
         if (this.state.resizing) {
-          const { resizeEdge } = this.state
-          let resizeTime = this.resizeTimeSnap(this.timeFor(e))
+          const {resizeEdge} = this.state
+          const time =
+            resizeEdge === 'left' ? this.itemTimeStart : this.itemTimeEnd
+          let resizeTime = this.resizeTimeSnap(
+            time + this.resizeTimeDelta(e, resizeEdge)
+          )
 
           if (this.props.moveResizeValidator) {
             const validResult = this.props.moveResizeValidator(
@@ -456,10 +457,11 @@ export default class Item extends Component {
     return !!props.canMove
   }
 
-  componentDidUpdate(prevProps) {
-    this.cacheDataFromProps(this.props)
-    let { interactMounted } = this.state
-    const couldDrag = prevProps.selected && this.canMove(prevProps)
+  componentWillReceiveProps(nextProps) {
+    this.cacheDataFromProps(nextProps)
+
+    let {interactMounted} = this.state
+    const couldDrag = this.props.selected && this.canMove(this.props)
     const couldResizeLeft =
       prevProps.selected && this.canResizeLeft(prevProps)
     const couldResizeRight =
@@ -504,6 +506,27 @@ export default class Item extends Component {
       interactMounted,
     })
 
+    if (
+      interactMounted &&
+      (couldResizeLeft !== willBeAbleToResizeLeft ||
+        couldResizeRight !== willBeAbleToResizeRight)
+    ) {
+      const leftResize = this.props.useResizeHandle ? this.dragLeft : true
+      const rightResize = this.props.useResizeHandle ? this.dragRight : true
+
+      interact(this.item).resizable({
+        enabled: willBeAbleToResizeLeft || willBeAbleToResizeRight,
+        edges: {
+          top: false,
+          bottom: false,
+          left: willBeAbleToResizeLeft && leftResize,
+          right: willBeAbleToResizeRight && rightResize
+        }
+      })
+    }
+    if (interactMounted && couldDrag !== willBeAbleToDrag) {
+      interact(this.item).draggable({enabled: willBeAbleToDrag})
+    }
   }
 
   onMouseDown = e => {
@@ -632,8 +655,8 @@ export default class Item extends Component {
         ? selectedAndCanResizeRight
         : {},
       this.props.selected &
-      this.canResizeRight(this.props) &
-      this.state.dragging
+        this.canResizeRight(this.props) &
+        this.state.dragging
         ? selectedAndCanResizeRightAndDragRight
         : {},
       props.style,
